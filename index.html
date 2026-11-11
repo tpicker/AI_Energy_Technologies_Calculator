@@ -1,26 +1,427 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AI Facility Energy Cost and Schedule Calculator</title>
+<title>AI Technology Energy Cost and Schedule Calculator</title>
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#183147;background:#f5f8fa}*{box-sizing:border-box}body{margin:0}main{max-width:1100px;margin:auto;padding:24px 18px 48px}header{background:#07345d;color:white;padding:26px 22px;border-radius:14px}h1{font-size:clamp(1.4rem,3vw,2rem);margin:0 0 6px}h2{font-size:1.13rem;margin:0 0 12px}header p{margin:0;color:#d7e7f5;line-height:1.5}.toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin:18px 0}.btn{border:1px solid #a8bac7;background:white;color:#07345d;border-radius:8px;padding:10px 14px;font:inherit;font-weight:650;cursor:pointer}.btn:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #1d83cf;outline-offset:3px}.btn.primary{background:#07345d;color:white;border-color:#07345d}.btn:hover{filter:brightness(.95)}.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}.tile{background:white;border:1px solid #d9e3e9;border-radius:12px;padding:17px 15px;min-width:0}.tile .lab{font-size:.83rem;color:#456176;font-weight:650}.tile output{display:block;font-size:clamp(1.16rem,2vw,1.55rem);font-weight:780;margin:8px 0 3px;overflow-wrap:anywhere}.tile small{color:#516a7c}section.panel{background:white;border:1px solid #d9e3e9;border-radius:12px;padding:20px;margin-top:18px}.sub{color:#526a7c;font-size:.91rem;margin:0 0 16px;line-height:1.5}.tech-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tech{border:1px solid #d5e1e8;border-radius:10px;padding:13px;display:flex;align-items:flex-start;gap:10px;cursor:pointer}.tech:has(input:checked){border-color:#08769c;background:#ebf8fb}.tech input{width:18px;height:18px;accent-color:#006d8f;margin-top:3px;flex:none}.tech strong{display:block;line-height:1.35}.tech small{color:#516679;line-height:1.45;display:block;margin-top:5px}.tablewrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:.89rem}th,td{text-align:left;padding:10px 8px;border-bottom:1px solid #e1e8ed}th{background:#eff4f7;white-space:nowrap}td.num{text-align:right;white-space:nowrap}th.num{text-align:right}tr:last-child td{border-bottom:none}details{margin-top:15px}summary{font-weight:700;cursor:pointer;color:#07345d}ul{line-height:1.65;margin-bottom:0;padding-left:23px}.notice{border-left:4px solid #bb7b19;background:#fff9ed;padding:12px 14px;margin-top:18px;font-size:.88rem;line-height:1.55}footer{margin-top:22px;color:#566a77;font-size:.82rem;line-height:1.55}@media(max-width:690px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.tech-grid{grid-template-columns:1fr}main{padding:12px}section.panel{padding:14px}}@media print{body{background:#fff}.toolbar,.tech-grid,details{display:none}section.panel,header,.tile{break-inside:avoid}header{color:#000;background:#fff;border:1px solid #888}header p{color:#333}}
+
+.tech{display:block;cursor:default}.tech-select{display:flex;align-items:flex-start;gap:10px;cursor:pointer}.tech-select span{min-width:0}.quantity{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:12px 0 0 28px}.quantity label{font-size:.86rem;font-weight:650}.stepper{display:flex;align-items:center;gap:5px}.stepper .btn{min-width:38px;min-height:38px;padding:5px 9px}.stepper .btn:disabled{opacity:.45;cursor:default}.stepper input{width:78px;height:38px;margin:0;border:1px solid #a8bac7;border-radius:6px;padding:5px;font:inherit;text-align:center;accent-color:auto}.input-error{color:#934018;margin-left:28px}.input-error[hidden]{display:none}.cell-note{display:block;font-size:.8rem;font-weight:400;color:#516679;margin-top:4px;line-height:1.4}.capacity-breakdown{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:11px}.schedule-controls{border:1px solid #d5e1e8;border-radius:8px;padding:10px 12px;margin:0 0 12px}.schedule-controls legend{font-weight:700;padding:0 5px}.schedule-controls label{display:inline-flex;gap:6px;align-items:center;margin:4px 18px 4px 0;cursor:pointer}.schedule-controls input{accent-color:#006d8f}#count{font-weight:650}.notice p{margin:0 0 8px}.notice p:last-child{margin-bottom:0}
+@media(max-width:690px){.capacity-breakdown{grid-template-columns:1fr}.quantity{margin-left:28px}.toolbar-actions{display:flex;gap:8px;flex-wrap:wrap}.schedule-controls label{display:flex;margin-right:0}}
+@page{margin:12mm}
+@media print{main{max-width:none;padding:0}header{padding:12px;border-radius:8px}h1{font-size:20px}h2{font-size:15px}.toolbar{display:block;margin:10px 0}.toolbar-actions,.selection-panel,.schedule-controls{display:none}.tiles{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.capacity-breakdown{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:7px}.tile{padding:9px;border-radius:7px}.tile output{font-size:16px;margin:5px 0}.tile .lab,.tile small{font-size:11px}.portfolio-panel{break-inside:auto}section.panel{padding:12px;margin-top:12px}.sub{font-size:11px;margin-bottom:10px}.tablewrap{overflow:visible}table{font-size:11px;table-layout:fixed}th,td{padding:7px 5px;overflow-wrap:anywhere}th{white-space:normal}td.num{white-space:normal}thead{display:table-header-group}tr,.notice,footer{break-inside:avoid}.portfolio-table th:first-child{width:27%}.portfolio-table th:nth-child(2){width:7%}.portfolio-table th:nth-child(3),.portfolio-table th:nth-child(4){width:24%}.portfolio-table th:nth-child(5){width:18%}.cell-note{font-size:10px}.notice{font-size:11px;margin-top:10px}footer{font-size:10px;margin-top:12px}}
 </style></head><body><main>
-<header><h1>AI Facility Energy Cost &amp; Schedule Calculator</h1><p>Select energy technologies to compare installed capacity, rough project costs, and construction timelines. Each visit starts with a fresh selection.</p></header>
-<div class="toolbar"><span id="count" aria-live="polite">0 technologies selected</span><div><button class="btn" id="reset" type="button">↺ Reset selections</button> <button class="btn primary" id="print" type="button">Print / Save results</button></div></div>
+<header><h1>AI Technology Energy Cost &amp; Schedule Calculator</h1><p>Choose energy technologies and unit quantities to compare installed capacity, rough project costs, and construction timelines. Each visit starts with a fresh selection.</p></header>
+<div class="toolbar"><span id="count" aria-live="polite">0 units across 0 technologies</span><div class="toolbar-actions"><button class="btn" id="reset" type="button">↺ Reset selections</button> <button class="btn primary" id="print" type="button">Print / Save PDF</button></div></div>
 <div class="tiles" aria-live="polite">
-<div class="tile"><div class="lab">Total capacity</div><output id="capacity">0–0 MW</output><small>Installed nameplate capacity</small></div>
-<div class="tile"><div class="lab">Total watts</div><output id="watts">0–0 W</output><small>1 MW = 1,000,000 W</small></div>
-<div class="tile"><div class="lab">Rough project cost</div><output id="cost">$0–$0 M</output><small>Million USD, estimated range</small></div>
-<div class="tile"><div class="lab">Portfolio build window</div><output id="years">0–0 years</output><small>Slowest selected technology</small></div>
+<div class="tile"><div class="lab">Generation capacity</div><output id="capacity">0–0 MW</output><small>Generation only; nameplate capacity</small></div>
+<div class="tile"><div class="lab">Generation watts</div><output id="watts">0–0 W</output><small>1 MW = 1,000,000 W</small></div>
+<div class="tile"><div class="lab">Rough project cost</div><output id="cost">$0–$0 M</output><small>All selected units; million USD</small></div>
+<div class="tile"><div class="lab">Portfolio build window</div><output id="years">0–0 years</output><small id="scheduleMode">Parallel construction</small></div>
 </div>
-<section class="panel"><h2>1. Choose your energy technologies</h2><p class="sub">Select as many technologies as you want. The numbers recalculate automatically. These are representative planning ranges from the course workbook, not site-specific engineering estimates.</p><div class="tech-grid" id="choices"></div></section>
-<section class="panel"><h2>2. Review your selected portfolio</h2><p class="sub">Capacity and cost ranges are added across selected technologies. Construction time uses the longest minimum and maximum build time because projects may overlap.</p><div class="tablewrap"><table><thead><tr><th>Technology</th><th class="num">Capacity (MW)</th><th class="num">Cost ($M)</th><th class="num">Build (years)</th></tr></thead><tbody id="selectedRows"><tr><td colspan="4">Select a technology above to begin.</td></tr></tbody></table></div><div class="notice"><strong>Interpretation matters:</strong> Storage is not electricity generation. Adding MW across solar, wind, gas, and storage does not establish firm, continuously available capacity. Consider reliability, emissions, siting, permitting, and local conditions before making a recommendation.</div></section>
+<div class="tiles capacity-breakdown" aria-live="polite">
+<div class="tile"><div class="lab">Battery storage power</div><output id="storage">0–0 MW</output><small>Standalone batteries; excluded from generation</small></div>
+<div class="tile"><div class="lab">Solar + Storage capacity</div><output id="hybrid">0–0 MW</output><small>Unsplit workbook range; reported separately</small></div>
+</div>
+<section class="panel selection-panel"><h2>1. Choose your energy technologies</h2><p class="sub">Select a technology for one unit, or use − / + and the quantity field to add more. Enter 0–9,999 whole units per technology; 0 removes it. Capacity, cost, and build ranges shown on each card are per unit. Results update automatically. These are representative planning ranges from the course workbook, not site-specific engineering estimates.</p><div class="tech-grid" id="choices"></div></section>
+<section class="panel portfolio-panel"><h2>2. Review your selected portfolio</h2>
+<fieldset class="schedule-controls"><legend>Construction schedule</legend><label><input type="radio" name="schedule" value="parallel" checked> Parallel — all units overlap</label><label><input type="radio" name="schedule" value="sequential"> Sequential — one unit at a time</label></fieldset>
+<p class="sub" id="scheduleExplanation"></p><div class="tablewrap"><table class="portfolio-table"><thead><tr><th scope="col">Technology</th><th scope="col" class="num">Units</th><th scope="col" class="num">Total capacity (MW)</th><th scope="col" class="num">Total cost ($M)</th><th scope="col" class="num">Build (years)</th></tr></thead><tbody id="selectedRows"><tr><td colspan="5">Select a technology above to begin.</td></tr></tbody></table></div><div class="notice"><p><strong>Interpretation matters:</strong> Generation, standalone battery storage power, and Solar + Storage capacity are reported separately. Battery storage shifts electricity in time; it does not generate electricity. MW describes storage power, not energy duration (MWh).</p><p>The workbook gives one capacity range for Solar + Storage without a generation/storage split. That range is excluded from both generation and standalone storage totals to avoid double counting; its full cost and construction time are included.</p><p>Nameplate MW does not establish firm, continuously available supply. Consider reliability, emissions, siting, permitting, and local conditions before making a recommendation.</p></div></section>
 <section class="panel"><h2>3. Compare with AI development timelines</h2><div class="tablewrap"><table><thead><tr><th>AI scale</th><th>Capacity</th><th>Illustrative timeline</th><th>Technology path</th></tr></thead><tbody><tr><td>Low AI</td><td>10–50 MW</td><td>1–3 years</td><td>Solar + batteries; small gas turbines</td></tr><tr><td>Medium AI</td><td>50–300 MW</td><td>2–5 years</td><td>Gas combined cycle; wind + solar hybrid</td></tr><tr><td>High AI</td><td>300–1,000 MW</td><td>3–10 years</td><td>Large gas plants; offshore wind; emerging SMRs</td></tr><tr><td>Extreme AI</td><td>1–5 GW regions</td><td>8–20 years</td><td>Nuclear fleets; large renewable + storage buildouts</td></tr></tbody></table></div>
-<details><summary>How should I interpret the results?</summary><ul><li>Compare the selected portfolio's range against the AI scale you are studying.</li><li>Ask whether capacity is dispatchable or intermittent and whether the location can support the technology.</li><li>Cost ranges represent approximate total project capital costs from the supplied course workbook, not lifetime costs.</li><li>Project timelines may overlap; the workbook uses the longest selected technology as a simplified portfolio window.</li></ul></details></section>
+<details><summary>How should I interpret the results?</summary><ul><li>Compare the selected portfolio's range against the AI scale you are studying.</li><li>Ask whether capacity is dispatchable or intermittent and whether the location can support the technology.</li><li>Cost ranges represent approximate total project capital costs from the supplied course workbook, not lifetime costs.</li><li>Each unit repeats the workbook's representative project range; quantities multiply both ends of its capacity and capital-cost ranges.</li><li>Parallel construction assumes all selected units can start together and uses the longest minimum and maximum build time. Sequential construction assumes no overlap and adds the build time for every unit. Both are simplified planning scenarios.</li><li>Storage and unsplit Solar + Storage capacity are shown separately from generation. Storage energy capacity and duration are not supplied by the workbook.</li></ul></details></section>
 <footer>Source: AI Facility Energy Cost and Schedule Calculator (provided course workbook), Student Selector and Schedule Guide. Estimates are educational approximations. Selections stay within this browser page and are not written to a shared workbook; refreshing or using Reset clears the choices. <span id="privacy"></span></footer>
 </main>
 <script>
-'use strict';const technologies=[{"name": "Natural Gas (Combined Cycle)", "size": "200-800 MW", "minMW": 200, "maxMW": 800, "minCost": 200, "maxCost": 1300, "minYears": 2, "maxYears": 4, "insight": "Fastest large-scale reliable power."}, {"name": "Natural Gas Peaker", "size": "50-200 MW", "minMW": 50, "maxMW": 200, "minCost": 35, "maxCost": 240, "minYears": 1, "maxYears": 3, "insight": "Ideal for peak AI loads."}, {"name": "Coal Plant", "size": "500-1,000 MW", "minMW": 500, "maxMW": 1000, "minCost": 5000, "maxCost": 10000, "minYears": 5, "maxYears": 10, "insight": "Declining, regulatory barriers."}, {"name": "Nuclear (Large)", "size": "1,000-1,600 MW", "minMW": 1000, "maxMW": 1600, "minCost": 10000, "maxCost": 20000, "minYears": 8, "maxYears": 15, "insight": "Long-term baseload for AI."}, {"name": "Small Modular Reactor (SMR)", "size": "50-300 MW", "minMW": 50, "maxMW": 300, "minCost": 300, "maxCost": 3000, "minYears": 4, "maxYears": 7, "insight": "Future AI-dedicated power."}, {"name": "Solar PV (Utility)", "size": "50-300 MW", "minMW": 50, "maxMW": 300, "minCost": 80, "maxCost": 1200, "minYears": 1, "maxYears": 2, "insight": "Fastest renewable deployment."}, {"name": "Solar + Storage", "size": "100-500 MW", "minMW": 100, "maxMW": 500, "minCost": 200, "maxCost": 2500, "minYears": 1, "maxYears": 3, "insight": "Required for AI reliability."}, {"name": "Onshore Wind", "size": "100-300 MW", "minMW": 100, "maxMW": 300, "minCost": 170, "maxCost": 1100, "minYears": 2, "maxYears": 4, "insight": "Cheap but intermittent."}, {"name": "Offshore Wind", "size": "300-1,000 MW", "minMW": 300, "maxMW": 1000, "minCost": 2500, "maxCost": 9000, "minYears": 5, "maxYears": 10, "insight": "Large output, slow permitting."}, {"name": "Hydropower (Large Dam)", "size": "100-1,000+ MW", "minMW": 100, "maxMW": 1000, "minCost": 250, "maxCost": 16000, "minYears": 5, "maxYears": 10, "insight": "Highly site-constrained."}, {"name": "Geothermal", "size": "20-100 MW", "minMW": 20, "maxMW": 100, "minCost": 40, "maxCost": 500, "minYears": 3, "maxYears": 6, "insight": "Excellent baseload, location-specific."}, {"name": "Biomass / Waste-to-Energy", "size": "20-100 MW", "minMW": 20, "maxMW": 100, "minCost": 80, "maxCost": 500, "minYears": 3, "maxYears": 5, "insight": "Reliable but limited scale."}, {"name": "Battery Storage (grid-scale)", "size": "50-300 MW", "minMW": 50, "maxMW": 300, "minCost": 65, "maxCost": 400, "minYears": 1, "maxYears": 2, "insight": "Critical for AI uptime."}];const choices=document.getElementById('choices');const format=n=>new Intl.NumberFormat('en-US').format(n);const range=(a,b,suffix='')=>`${format(a)}–${format(b)}${suffix}`;
-for(let i=0;i<technologies.length;i++){const t=technologies[i];const label=document.createElement('label');label.className='tech';const cb=document.createElement('input');cb.type='checkbox';cb.value=String(i);cb.addEventListener('change',update);const div=document.createElement('span');const title=document.createElement('strong');title.textContent=t.name;const desc=document.createElement('small');desc.textContent=`${t.size} · ${t.minYears}–${t.maxYears} years · ${t.insight}`;div.append(title,desc);label.append(cb,div);choices.append(label)}
-function update(){const checked=[...choices.querySelectorAll('input:checked')];const selected=checked.map(x=>technologies[+x.value]);const totals=selected.reduce((a,t)=>{a.minMW+=t.minMW;a.maxMW+=t.maxMW;a.minCost+=t.minCost;a.maxCost+=t.maxCost;a.minYears=Math.max(a.minYears,t.minYears);a.maxYears=Math.max(a.maxYears,t.maxYears);return a},{minMW:0,maxMW:0,minCost:0,maxCost:0,minYears:0,maxYears:0});document.getElementById('count').textContent=`${selected.length} technolog${selected.length===1?'y':'ies'} selected`;document.getElementById('capacity').textContent=range(totals.minMW,totals.maxMW,' MW');document.getElementById('watts').textContent=range(totals.minMW*1000000,totals.maxMW*1000000,' W');document.getElementById('cost').textContent=`$${format(totals.minCost)}–$${format(totals.maxCost)} M`;document.getElementById('years').textContent=range(totals.minYears,totals.maxYears,' years');const body=document.getElementById('selectedRows');body.replaceChildren();if(!selected.length){const r=body.insertRow(),c=r.insertCell();c.colSpan=4;c.textContent='Select a technology above to begin.';return}for(const t of selected){const row=body.insertRow();[t.name,range(t.minMW,t.maxMW),range(t.minCost,t.maxCost),range(t.minYears,t.maxYears)].forEach((v,j)=>{const cell=row.insertCell();cell.textContent=v;if(j)cell.className='num'})}}
-document.getElementById('reset').addEventListener('click',()=>{choices.querySelectorAll('input').forEach(c=>c.checked=false);update();document.getElementById('reset').focus()});document.getElementById('print').addEventListener('click',()=>window.print());update();
+'use strict';
+
+const technologies = [
+  {
+    "name": "Natural Gas (Combined Cycle)",
+    "size": "200-800 MW",
+    "minMW": 200,
+    "maxMW": 800,
+    "minCost": 200,
+    "maxCost": 1300,
+    "minYears": 2,
+    "maxYears": 4,
+    "insight": "Fastest large-scale reliable power.",
+    "kind": "generation"
+  },
+  {
+    "name": "Natural Gas Peaker",
+    "size": "50-200 MW",
+    "minMW": 50,
+    "maxMW": 200,
+    "minCost": 35,
+    "maxCost": 240,
+    "minYears": 1,
+    "maxYears": 3,
+    "insight": "Ideal for peak AI loads.",
+    "kind": "generation"
+  },
+  {
+    "name": "Coal Plant",
+    "size": "500-1,000 MW",
+    "minMW": 500,
+    "maxMW": 1000,
+    "minCost": 5000,
+    "maxCost": 10000,
+    "minYears": 5,
+    "maxYears": 10,
+    "insight": "Declining, regulatory barriers.",
+    "kind": "generation"
+  },
+  {
+    "name": "Nuclear (Large)",
+    "size": "1,000-1,600 MW",
+    "minMW": 1000,
+    "maxMW": 1600,
+    "minCost": 10000,
+    "maxCost": 20000,
+    "minYears": 8,
+    "maxYears": 15,
+    "insight": "Long-term baseload for AI.",
+    "kind": "generation"
+  },
+  {
+    "name": "Small Modular Reactor (SMR)",
+    "size": "50-300 MW",
+    "minMW": 50,
+    "maxMW": 300,
+    "minCost": 300,
+    "maxCost": 3000,
+    "minYears": 4,
+    "maxYears": 7,
+    "insight": "Future AI-dedicated power.",
+    "kind": "generation"
+  },
+  {
+    "name": "Solar PV (Utility)",
+    "size": "50-300 MW",
+    "minMW": 50,
+    "maxMW": 300,
+    "minCost": 80,
+    "maxCost": 1200,
+    "minYears": 1,
+    "maxYears": 2,
+    "insight": "Fastest renewable deployment.",
+    "kind": "generation"
+  },
+  {
+    "name": "Solar + Storage",
+    "size": "100-500 MW",
+    "minMW": 100,
+    "maxMW": 500,
+    "minCost": 200,
+    "maxCost": 2500,
+    "minYears": 1,
+    "maxYears": 3,
+    "insight": "Required for AI reliability.",
+    "kind": "hybrid"
+  },
+  {
+    "name": "Onshore Wind",
+    "size": "100-300 MW",
+    "minMW": 100,
+    "maxMW": 300,
+    "minCost": 170,
+    "maxCost": 1100,
+    "minYears": 2,
+    "maxYears": 4,
+    "insight": "Cheap but intermittent.",
+    "kind": "generation"
+  },
+  {
+    "name": "Offshore Wind",
+    "size": "300-1,000 MW",
+    "minMW": 300,
+    "maxMW": 1000,
+    "minCost": 2500,
+    "maxCost": 9000,
+    "minYears": 5,
+    "maxYears": 10,
+    "insight": "Large output, slow permitting.",
+    "kind": "generation"
+  },
+  {
+    "name": "Hydropower (Large Dam)",
+    "size": "100-1,000+ MW",
+    "minMW": 100,
+    "maxMW": 1000,
+    "minCost": 250,
+    "maxCost": 16000,
+    "minYears": 5,
+    "maxYears": 10,
+    "insight": "Highly site-constrained.",
+    "kind": "generation"
+  },
+  {
+    "name": "Geothermal",
+    "size": "20-100 MW",
+    "minMW": 20,
+    "maxMW": 100,
+    "minCost": 40,
+    "maxCost": 500,
+    "minYears": 3,
+    "maxYears": 6,
+    "insight": "Excellent baseload, location-specific.",
+    "kind": "generation"
+  },
+  {
+    "name": "Biomass / Waste-to-Energy",
+    "size": "20-100 MW",
+    "minMW": 20,
+    "maxMW": 100,
+    "minCost": 80,
+    "maxCost": 500,
+    "minYears": 3,
+    "maxYears": 5,
+    "insight": "Reliable but limited scale.",
+    "kind": "generation"
+  },
+  {
+    "name": "Battery Storage (grid-scale)",
+    "size": "50-300 MW",
+    "minMW": 50,
+    "maxMW": 300,
+    "minCost": 65,
+    "maxCost": 400,
+    "minYears": 1,
+    "maxYears": 2,
+    "insight": "Critical for AI uptime.",
+    "kind": "storage"
+  }
+];
+const MAX_QUANTITY = 9999;
+const quantities = technologies.map(() => 0);
+const controls = [];
+const choices = document.getElementById('choices');
+const numberFormat = new Intl.NumberFormat('en-US');
+const format = value => numberFormat.format(value);
+const range = (minimum, maximum, suffix = '', openMaximum = false) => format(minimum) + '–' + format(maximum) + (openMaximum ? '+' : '') + suffix;
+const kindLabels = {
+  generation: 'Generation',
+  storage: 'Battery storage power',
+  hybrid: 'Solar + Storage (unsplit)'
+};
+
+function showQuantityError(control, message, invalid) {
+  control.error.textContent = message;
+  control.error.hidden = !message;
+  control.input.setCustomValidity(invalid ? message : '');
+  if (invalid) {
+    control.input.setAttribute('aria-invalid', 'true');
+  } else {
+    control.input.removeAttribute('aria-invalid');
+  }
+}
+
+function setQuantity(index, quantity) {
+  quantities[index] = quantity;
+  const control = controls[index];
+  control.input.value = String(quantity);
+  control.checkbox.checked = quantity > 0;
+  control.decrease.disabled = quantity === 0;
+  control.increase.disabled = quantity === MAX_QUANTITY;
+  showQuantityError(control, '', false);
+  update();
+}
+
+function readQuantity(input) {
+  const quantity = input.value === '' ? NaN : Number(input.value);
+  return !input.validity.badInput && Number.isInteger(quantity) && quantity >= 0 && quantity <= MAX_QUANTITY
+    ? quantity
+    : null;
+}
+
+function commitQuantity(index) {
+  const control = controls[index];
+  const quantity = readQuantity(control.input);
+  if (quantity !== null) {
+    setQuantity(index, quantity);
+  } else if (control.input.value === '' && !control.input.validity.badInput) {
+    setQuantity(index, 0);
+  } else {
+    setQuantity(index, quantities[index]);
+    showQuantityError(control, 'Enter a whole number from 0 to 9,999. Previous quantity restored.', false);
+  }
+}
+
+technologies.forEach((technology, index) => {
+  const card = document.createElement('div');
+  card.className = 'tech';
+  const label = document.createElement('label');
+  label.className = 'tech-select';
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.id = 'technology-' + index;
+  checkbox.setAttribute('aria-label', technology.name);
+  const description = document.createElement('span');
+  const title = document.createElement('strong');
+  title.textContent = technology.name;
+  const details = document.createElement('small');
+  details.id = 'technology-details-' + index;
+  details.textContent = technology.size + ' · $' + format(technology.minCost) + '–$' + format(technology.maxCost)
+    + ' M · ' + technology.minYears + '–' + technology.maxYears + ' years per unit · ' + technology.insight;
+  const category = document.createElement('small');
+  category.textContent = kindLabels[technology.kind];
+  description.append(title, details, category);
+  label.append(checkbox, description);
+
+  const quantityControl = document.createElement('div');
+  quantityControl.className = 'quantity';
+  const quantityLabel = document.createElement('label');
+  quantityLabel.htmlFor = 'quantity-' + index;
+  quantityLabel.textContent = 'Units';
+  const stepper = document.createElement('div');
+  stepper.className = 'stepper';
+  const decrease = document.createElement('button');
+  decrease.type = 'button';
+  decrease.className = 'btn';
+  decrease.textContent = '−';
+  decrease.setAttribute('aria-label', 'Remove one unit of ' + technology.name);
+  decrease.disabled = true;
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.id = 'quantity-' + index;
+  input.min = '0';
+  input.max = String(MAX_QUANTITY);
+  input.step = '1';
+  input.value = '0';
+  input.setAttribute('inputmode', 'numeric');
+  input.setAttribute('autocomplete', 'off');
+  input.setAttribute('aria-label', 'Units of ' + technology.name);
+  input.setAttribute('aria-describedby', details.id + ' quantity-error-' + index);
+  const increase = document.createElement('button');
+  increase.type = 'button';
+  increase.className = 'btn';
+  increase.textContent = '+';
+  increase.setAttribute('aria-label', 'Add one unit of ' + technology.name);
+  stepper.append(decrease, input, increase);
+  quantityControl.append(quantityLabel, stepper);
+  const error = document.createElement('small');
+  error.id = 'quantity-error-' + index;
+  error.className = 'input-error';
+  error.setAttribute('role', 'status');
+  error.hidden = true;
+  card.append(label, quantityControl, error);
+  choices.append(card);
+  controls.push({checkbox, input, decrease, increase, error});
+
+  checkbox.addEventListener('change', () => setQuantity(index, checkbox.checked ? Math.max(1, quantities[index]) : 0));
+  decrease.addEventListener('click', () => setQuantity(index, Math.max(0, quantities[index] - 1)));
+  increase.addEventListener('click', () => setQuantity(index, Math.min(MAX_QUANTITY, quantities[index] + 1)));
+  input.addEventListener('input', () => {
+    const quantity = readQuantity(input);
+    if (quantity !== null) {
+      setQuantity(index, quantity);
+    } else {
+      showQuantityError(controls[index], 'Enter a whole number from 0 to 9,999. Last valid quantity still applies.', true);
+    }
+  });
+  input.addEventListener('change', () => commitQuantity(index));
+});
+
+function calculatePortfolio(unitQuantities, schedule) {
+  const totals = {
+    units: 0,
+    technologyCount: 0,
+    generation: {minimum: 0, maximum: 0, openMaximum: false},
+    storage: {minimum: 0, maximum: 0, openMaximum: false},
+    hybrid: {minimum: 0, maximum: 0, openMaximum: false},
+    minCost: 0,
+    maxCost: 0,
+    minYears: 0,
+    maxYears: 0,
+    selected: []
+  };
+  technologies.forEach((technology, index) => {
+    const quantity = unitQuantities[index];
+    if (!quantity) return;
+    totals.units += quantity;
+    totals.technologyCount += 1;
+    totals[technology.kind].minimum += technology.minMW * quantity;
+    totals[technology.kind].maximum += technology.maxMW * quantity;
+    totals[technology.kind].openMaximum ||= technology.size.includes('+');
+    totals.minCost += technology.minCost * quantity;
+    totals.maxCost += technology.maxCost * quantity;
+    const minYears = schedule === 'sequential' ? technology.minYears * quantity : technology.minYears;
+    const maxYears = schedule === 'sequential' ? technology.maxYears * quantity : technology.maxYears;
+    totals.minYears = schedule === 'sequential' ? totals.minYears + minYears : Math.max(totals.minYears, minYears);
+    totals.maxYears = schedule === 'sequential' ? totals.maxYears + maxYears : Math.max(totals.maxYears, maxYears);
+    totals.selected.push({technology, quantity, minYears, maxYears});
+  });
+  return totals;
+}
+
+function addCell(row, value, note, numeric = false) {
+  const cell = row.insertCell();
+  cell.textContent = value;
+  if (numeric) cell.className = 'num';
+  if (note) {
+    const detail = document.createElement('small');
+    detail.className = 'cell-note';
+    detail.textContent = note;
+    cell.append(detail);
+  }
+}
+
+function update() {
+  const schedule = document.querySelector('input[name="schedule"]:checked').value;
+  const totals = calculatePortfolio(quantities, schedule);
+  document.getElementById('count').textContent = format(totals.units) + ' unit' + (totals.units === 1 ? '' : 's')
+    + ' across ' + totals.technologyCount + ' technolog' + (totals.technologyCount === 1 ? 'y' : 'ies');
+  document.getElementById('capacity').textContent = range(totals.generation.minimum, totals.generation.maximum, ' MW', totals.generation.openMaximum);
+  document.getElementById('watts').textContent = range(totals.generation.minimum * 1000000, totals.generation.maximum * 1000000, ' W', totals.generation.openMaximum);
+  document.getElementById('storage').textContent = range(totals.storage.minimum, totals.storage.maximum, ' MW');
+  document.getElementById('hybrid').textContent = range(totals.hybrid.minimum, totals.hybrid.maximum, ' MW');
+  document.getElementById('cost').textContent = '$' + format(totals.minCost) + '–$' + format(totals.maxCost) + ' M';
+  document.getElementById('years').textContent = range(totals.minYears, totals.maxYears, ' years');
+  document.getElementById('scheduleMode').textContent = schedule === 'parallel' ? 'Parallel construction' : 'Sequential construction';
+  document.getElementById('scheduleExplanation').textContent = 'Capacity and capital cost ranges are multiplied by unit quantity. '
+    + (schedule === 'parallel'
+      ? 'Parallel construction: all units start together. The portfolio window uses the longest minimum and maximum build time; adding parallel units does not multiply duration.'
+      : 'Sequential construction: all units and technologies are built one at a time. Each technology row multiplies its per-unit duration by quantity; the portfolio window adds every row.')
+    + ' All selected generation, storage, and Solar + Storage projects contribute to cost and schedule.';
+
+  const body = document.getElementById('selectedRows');
+  body.replaceChildren();
+  if (!totals.selected.length) {
+    const cell = body.insertRow().insertCell();
+    cell.colSpan = 5;
+    cell.textContent = 'Select a technology above to begin.';
+    return;
+  }
+  totals.selected.forEach(selection => {
+    const {technology, quantity, minYears, maxYears} = selection;
+    const row = body.insertRow();
+    addCell(row, technology.name, kindLabels[technology.kind]);
+    addCell(row, format(quantity), '', true);
+    addCell(row, range(technology.minMW * quantity, technology.maxMW * quantity, '', technology.size.includes('+')), range(technology.minMW, technology.maxMW, '', technology.size.includes('+')) + ' per unit', true);
+    addCell(row, range(technology.minCost * quantity, technology.maxCost * quantity), range(technology.minCost, technology.maxCost) + ' per unit', true);
+    addCell(row, range(minYears, maxYears), schedule === 'parallel' ? 'All units overlap' : range(technology.minYears, technology.maxYears) + ' per unit', true);
+  });
+}
+
+document.querySelectorAll('input[name="schedule"]').forEach(input => input.addEventListener('change', update));
+document.getElementById('reset').addEventListener('click', () => {
+  quantities.fill(0);
+  controls.forEach(control => {
+    control.input.value = '0';
+    control.checkbox.checked = false;
+    control.decrease.disabled = true;
+    control.increase.disabled = false;
+    showQuantityError(control, '', false);
+  });
+  document.querySelector('input[name="schedule"][value="parallel"]').checked = true;
+  update();
+  document.getElementById('reset').focus();
+});
+function prepareQuantitiesForPrint() {
+  controls.forEach((control, index) => commitQuantity(index));
+}
+window.addEventListener('beforeprint', prepareQuantitiesForPrint);
+document.getElementById('print').addEventListener('click', () => {
+  prepareQuantitiesForPrint();
+  window.print();
+});
+update();
 </script></body></html>
