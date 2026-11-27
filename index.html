@@ -321,6 +321,7 @@ technologies.forEach((technology, index) => {
   details.id = 'technology-details-' + index;
   details.textContent = technology.size + ' · $' + format(technology.minCost) + '–$' + format(technology.maxCost)
     + ' M · ' + technology.minYears + '–' + technology.maxYears + ' years per unit' + (technology.insight ? ' · ' + technology.insight : '');
+  if(technology.name==='Oil/Petroleum')details.textContent=technology.insight;
   const category = document.createElement('small');
   category.textContent = kindLabels[technology.kind];
   description.append(title, details, category);
