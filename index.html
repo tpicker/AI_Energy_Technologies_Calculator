@@ -69,14 +69,12 @@
 <div class="response-copy-feedback"><p id="copy-help">Copy the current technology selections, quantities, estimates, and calculation basis for pasting into ThingLink.</p><p id="copy-status" role="status"></p><div class="response-copy-fallback" id="copy-fallback" hidden><label for="copy-text">Summary of responses — manual copy</label><p id="copy-instructions">Press Ctrl+C or Command+C to copy the selected text. On a touch device, use the text selection menu’s Copy command.</p><textarea id="copy-text" rows="10" readonly aria-describedby="copy-instructions"></textarea></div></div>
 
 <div class="tiles" aria-live="polite">
-<div class="tile"><div class="lab" id="capacity-label"><span class="totals-label-long">Total AI Readiness Energy Generation Capacity Required</span><span class="totals-label-short" aria-hidden="true">Energy capacity</span></div><output id="capacity" aria-labelledby="capacity-label">0–0 MW</output><small class="conversion-note">1 MW = 1,000,000 W</small></div>
+<div class="tile"><div class="lab" id="capacity-label"><span class="totals-label-long">Total AI Readiness Energy Generation Capacity Required</span><span class="totals-label-short" aria-hidden="true">Energy capacity</span></div><output id="capacity" aria-labelledby="capacity-label">0–0 MW</output><small class="conversion-note">1 MW = 1,000,000 W</small><small id="separate-capacities" hidden></small></div>
 <div class="tile"><div class="lab" id="cost-label"><span class="totals-label-long">Total AI Readiness Estimated Costs</span><span class="totals-label-short" aria-hidden="true">Estimated cost</span></div><output id="cost" aria-labelledby="cost-label">$0–$0 M</output><small>All selected units; million USD</small></div>
 <div class="tile"><div class="lab" id="years-label"><span class="totals-label-long">Total AI Readiness Estimated Schedule</span><span class="totals-label-short" aria-hidden="true">Schedule</span></div><output id="years" aria-labelledby="years-label">0–0 years</output></div>
 </div>
 <section class="panel selection-panel" aria-label="Energy technology selections"><div class="tech-grid" id="choices"></div></section>
-
-
-
+<p class="sub" id="oil-benchmark-note" hidden>Oil/Petroleum: the packet lists a 22–87 MW reference range. The editable Thika historical example is 87 MW, $146 million, and about 20 months (1.67 years) from power purchase agreement to operation. This is a comparison benchmark, not a general cost or delivery promise; allow additional preparation time and fuel/maintenance costs.</p>
 </main>
 <script>
 'use strict';
@@ -155,6 +153,18 @@ const technologies = [
     "kind": "generation"
   },
   {
+    "name": "Solar + Storage",
+    "size": "100-500 MW",
+    "minMW": 100,
+    "maxMW": 500,
+    "minCost": 200,
+    "maxCost": 2500,
+    "minYears": 1,
+    "maxYears": 3,
+    "kind": "hybrid",
+    "insight": "Combined technology rating; shown separately from generation and standalone storage."
+  },
+  {
     "name": "Onshore Wind",
     "size": "100-300 MW",
     "minMW": 100,
@@ -225,6 +235,18 @@ const technologies = [
     "maxYears": 2,
     "insight": "",
     "kind": "storage"
+  },
+  {
+    "name": "Oil/Petroleum",
+    "size": "87 MW historical example",
+    "minMW": 87,
+    "maxMW": 87,
+    "minCost": 146,
+    "maxCost": 146,
+    "minYears": 1.67,
+    "maxYears": 1.67,
+    "kind": "generation",
+    "insight": "Packet reference: 22–87 MW. Calculation uses the 87 MW Thika example: $146M and about 20 months from power purchase agreement to operation. Earlier preparation, fuel and maintenance are additional."
   }
 ];
 const SCHEDULE_METHOD="parallel";
@@ -398,6 +420,12 @@ function update() {
   document.getElementById('capacity').textContent=range(totals.generation.minimum,totals.generation.maximum,' MW',totals.generation.openMaximum);
   document.getElementById('cost').textContent='$'+format(totals.minCost)+'–$'+format(totals.maxCost)+' M';
   document.getElementById('years').textContent=range(totals.minYears,totals.maxYears,' years');
+  const separate=[];
+  if(totals.storage.maximum)separate.push('Battery power (separate): '+range(totals.storage.minimum,totals.storage.maximum,' MW'));
+  if(totals.hybrid.maximum)separate.push('Solar + Storage combined rating (separate): '+range(totals.hybrid.minimum,totals.hybrid.maximum,' MW'));
+  document.getElementById('separate-capacities').textContent=separate.join(' · ');
+  document.getElementById('separate-capacities').hidden=!separate.length;
+  document.getElementById('oil-benchmark-note').hidden=!totals.selected.some(row=>row.technology.name==='Oil/Petroleum');
 }
 
 document.getElementById('reset').addEventListener('click', () => {
@@ -437,13 +465,16 @@ function responseSummaryText(){
   totals.selected.forEach(({technology,quantity,minYears,maxYears})=>{
     lines.push(
       `${technology.name} — ${format(quantity)} units`,
-      `  ${technology.kind==='storage'?'Storage power (excluded from generation)':'Generation capacity'}: ${range(technology.minMW*quantity,technology.maxMW*quantity,' MW',technology.size.includes('+'))}`,
+      `  ${technology.kind==='storage'?'Storage power (excluded from generation)':technology.kind==='hybrid'?'Solar + Storage combined rating (reported separately)':'Generation capacity'}: ${range(technology.minMW*quantity,technology.maxMW*quantity,' MW',technology.size.includes('+'))}`,
       `  Estimated cost: $${range(technology.minCost*quantity,technology.maxCost*quantity)} million USD`,
       `  Estimated schedule: ${range(minYears,maxYears,' years')}`
     );
   });
+  if(totals.hybrid.maximum)lines.push('','Solar + Storage combined rating, separate from generation: '+range(totals.hybrid.minimum,totals.hybrid.maximum,' MW'));
+  if(totals.storage.maximum)lines.push('Battery power, separate from generation: '+range(totals.storage.minimum,totals.storage.maximum,' MW'));
+  if(totals.selected.some(row=>row.technology.name==='Oil/Petroleum'))lines.push('','Oil/Petroleum: the packet lists a 22–87 MW reference range. The editable Thika historical example is 87 MW, $146 million, and about 20 months (1.67 years) from power purchase agreement to operation. This is a comparison benchmark, not a general cost or delivery promise; allow additional preparation time and fuel/maintenance costs.');
   lines.push('', 'CALCULATION BASIS',
-    'The generation result totals your selected generation technologies; compare it with the MW requirement identified in the previous activity. Battery storage does not add generation MW.',
+    'The generation result totals your selected generation-only technologies. Battery power and the combined Solar + Storage rating are reported separately to avoid double-counting.',
     'Estimated costs add each selected quantity × its course cost range. These are illustrative unit-based estimates, not a factual statement of linear scaling.',
     'The estimated schedule uses the longest selected minimum and maximum time ranges, assuming the selected technologies progress together. Adding overlapping units does not multiply the duration.',
     'MW-to-W reference: 1 MW = 1,000,000 W. All capacity results above remain in MW.');
